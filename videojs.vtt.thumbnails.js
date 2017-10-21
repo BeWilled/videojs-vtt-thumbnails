@@ -1,6 +1,6 @@
 (function () {
   var defaults = {
-      src: 'http://s3-us-west-2.amazonaws.com/porncontainer/videos/37/sprites/vtt.vtt'
+      src: 'vtt.vtt'
     },
     extend = function () {
       var args, target, i, object, property;
