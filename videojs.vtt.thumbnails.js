@@ -1,6 +1,6 @@
 (function () {
   var defaults = {
-      src: 'sprite.vtt'
+      src: 'http://s3-us-west-2.amazonaws.com/porncontainer/videos/37/sprites/vtt.vtt'
     },
     extend = function () {
       var args, target, i, object, property;
@@ -95,12 +95,13 @@
       }
     })();
     var url = settings['src'];
-    settings['base']= url.substring(0, url.lastIndexOf('/'));
+    settings['base'] = url.substring(0, url.lastIndexOf('/'));
     var ret = {};
     var jsonFile = new XMLHttpRequest();
     jsonFile.open("GET", url, true);
     jsonFile.send();
     progressControl = player.controlBar.progressControl;
+    var tmp_div = {};
     var time_seek = document.createElement('div');
     jsonFile.onreadystatechange = function () {
       if (jsonFile.readyState == 4 && jsonFile.status == 200) {
@@ -109,20 +110,20 @@
         div = document.createElement('div');
         div.className = 'vjs-thumbnail-holder';
         img = document.createElement('div');
-        var tmp_div = document.createElement('div');
+        tmp_div = document.createElement('div');
         var current_time = player.currentTime();
         time_seek.innerHTML = current_time;
         time_seek.className = 'vjs-thumbnail-timeseek';
-        tmp_div.className = 'vjs-thumbnail-wapper';
+        tmp_div.className = 'vjs-thumbnail-wrapper';
         tmp_div.appendChild(img);
         tmp_div.appendChild(time_seek);
         div.appendChild(tmp_div);
 
 
         img.className = 'vjs-thumbnail';
-        img.style.height = ret[0].ic.h +'px'
-        img.style.width = ret[0].ic.w +'px'
-        img.style.background = 'url(' + settings['base']+ '/' + ret[0].ina + ') ' +  0 +'px' + ' ' + 0 + 'px';
+        img.style.height = ret[0].ic.h + 'px'
+        img.style.width = ret[0].ic.w + 'px'
+        img.style.background = 'url(' + settings['base'] + '/' + ret[0].ina + ') ' + 0 + 'px' + ' ' + 0 + 'px';
         img.style.display = 'inline-block';
 
         extend(tmp_div.style, settings['src'].style);
@@ -154,7 +155,6 @@
     });
 
 
-
     moveListener = function (event) {
       var elements = document.getElementsByClassName('vjs-time-tooltip')[0];
       time_seek.innerHTML = elements.innerHTML;
@@ -184,18 +184,19 @@
       mouseTime = parseTime(time_seek.innerHTML);
 
       var ac = {};
-      for(var i = 0 ; i < ret.length ; i++){
+      for (var i = 0; i < ret.length; i++) {
         var el = ret[i];
-        if(mouseTime>=el.tf && mouseTime<el.tt){
+        if (mouseTime >= el.tf && mouseTime < el.tt) {
           ac = el;
           continue;
         }
       }
-      img.style.height = ac.ic.h +'px'
-      img.style.width = (ac.ic.w - 1) +'px'
-      img.style.background = 'url(' + settings['base']+ '/' + ac.ina + ') ' +  -ac.ic.x +'px' + ' ' + -ac.ic.y + 'px';
+      img.style.height = ac.ic.h + 'px'
+      img.style.width = (ac.ic.w ) + 'px'
+      img.style.background = 'url(' + settings['base'] + '/' + ac.ina + ') ' + -ac.ic.x + 'px' + ' ' + -ac.ic.y + 'px';
       img.style.display = 'inline-block';
-      div.style.left = left -(ac.ic.w/2) + 'px';
+      tmp_div.style.top = (-ac.ic.h - 41) + 'px';
+      div.style.left = left - (ac.ic.w / 2) + 'px';
     };
 
     // update the thumbnail while hovering
@@ -213,43 +214,47 @@
     player.on('userinactive', moveCancel);
 
     function processWebvtt(webvtt) {
+
       var segments = webvtt.split('\n\n');
       segments.shift();
       var elements = new Array();
       segments.forEach(function (element) {
-        var e = element.split('\n');
-        var t = e[0];
-        var ti = t.split(' --> ');
-        var tf = parseTime(ti[0]);
-        var tt = parseTime(ti[1]);
-        var ii = e[1];
-        var iii = ii.split('#xywh=');
-        var ina = iii[0];
-        var ic = iii[1];
-        var ica = ic.split(',');
-        var icx = ica[0];
-        var icy = ica[1];
-        var icw = ica[2];
-        var ich = ica[3];
+        if (element) {
+          var e = element.split('\n');
+          var t = e[0];
+          var ti = t.split(' --> ');
+          var tf = parseTime(ti[0]);
+          var tt = parseTime(ti[1]);
+          var ii = e[1];
+          var iii = ii.split('#xywh=');
+          var ina = iii[0];
+          var ic = iii[1];
+          var ica = ic.split(',');
+          var icx = ica[0];
+          var icy = ica[1];
+          var icw = ica[2];
+          var ich = ica[3];
 
-        var ret = {};
-        ret.tf = tf;
-        ret.tt = tt;
-        ret.ina = ina;
-        ret.ic = {};
-        ret.ic.x = icx;
-        ret.ic.y = icy;
-        ret.ic.w = icw;
-        ret.ic.h = ich;
-        elements.unshift(ret);
+          var ret = {};
+          ret.tf = tf;
+          ret.tt = tt;
+          ret.ina = ina;
+          ret.ic = {};
+          ret.ic.x = icx;
+          ret.ic.y = icy;
+          ret.ic.w = icw;
+          ret.ic.h = ich;
+          elements.unshift(ret);
+        }
       });
       return elements;
     }
 
     function parseTime(hours) {
+
       var a = hours.split(':');
-      if(a[2]){
-        return  (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
+      if (a[2]) {
+        return (+a[0]) * 60 * 60 + (+a[1]) * 60 + (+a[2]);
       }
       return ((a[0]) * 60 + (+a[1]));
     }
